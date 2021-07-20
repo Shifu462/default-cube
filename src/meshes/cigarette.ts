@@ -2,6 +2,7 @@ import {
     Mesh,
     CylinderGeometry,
     MeshBasicMaterial,
+    Vector3,
 } from 'three';
 import { mergeMeshes } from '../utils/mergeMeshes';
 
@@ -30,6 +31,9 @@ export function createCigarette() {
     cigaretteMesh.position.y = 20;
     cigaretteMesh.rotateX(-Math.PI / 2);
     cigaretteMesh.castShadow = true;
+
+    const scale = .9;
+    cigaretteMesh.scale.sub(new Vector3(scale, scale, scale));
 
     return cigaretteMesh;
 }
