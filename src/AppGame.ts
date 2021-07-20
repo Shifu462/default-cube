@@ -32,8 +32,6 @@ export default class AppGame {
     orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
 
     dragControls: DragControls;
-    // this.dragControls = new DragControls([ this.cigaretteMesh ], this.camera, this.renderer.domElement);
-    // this.dragControls.activate();
 
     get aspect() {
         return this.windowSize.width / this.windowSize.height;
@@ -42,6 +40,11 @@ export default class AppGame {
     constructor() {
         this.renderer.setSize(this.windowSize.width, this.windowSize.height);
         this.renderer.shadowMap.enabled = true;
+
+        this.dragControls = new DragControls([ this.cigaretteMesh ], this.camera, this.renderer.domElement);
+        this.dragControls.addEventListener('dragstart', () => this.orbitControls.enabled = false);
+        this.dragControls.addEventListener('dragend', () => this.orbitControls.enabled = true);
+        this.dragControls.activate();
 
         this.scene.add(this.cigaretteMesh);
         this.scene.add(this.plateMesh);
