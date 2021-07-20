@@ -2,20 +2,17 @@ import {
     Scene,
     PerspectiveCamera,
     WebGLRenderer,
-    Mesh,
     Vector3,
     BoxGeometry,
-    CylinderGeometry,
-    MeshBasicMaterial,
     AmbientLight,
     Color,
     Points,
     PointsMaterial,
     FogExp2,
 } from 'three';
-import { DragControls } from 'three/examples/jsm/controls/DragControls';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { mergeMeshes } from './mergeMeshes';
+import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
+import { createCigarette } from './meshes/cigarette';
+import { createPlate } from './meshes/plate';
 
 export default class AppGame {
     windowSize = {
@@ -27,11 +24,9 @@ export default class AppGame {
     camera = new PerspectiveCamera(75, this.aspect, 0.1, 1000);
     renderer = new WebGLRenderer({ antialias: true });
 
-    cigaretteMesh = this.createCigarette();
-    plateMesh = this.createPlate();
-    orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
-
-    dragControls: DragControls;
+    cigaretteMesh = createCigarette();
+    plateMesh = createPlate();
+    pointerLockControls = new PointerLockControls(this.camera, document.body);
 
     get aspect() {
         return this.windowSize.width / this.windowSize.height;
@@ -41,10 +36,7 @@ export default class AppGame {
         this.renderer.setSize(this.windowSize.width, this.windowSize.height);
         this.renderer.shadowMap.enabled = true;
 
-        this.dragControls = new DragControls([ this.cigaretteMesh ], this.camera, this.renderer.domElement);
-        this.dragControls.addEventListener('dragstart', () => this.orbitControls.enabled = false);
-        this.dragControls.addEventListener('dragend', () => this.orbitControls.enabled = true);
-        this.dragControls.activate();
+        this.scene.add(this.pointerLockControls.getObject());
 
         this.scene.add(this.cigaretteMesh);
         this.scene.add(this.plateMesh);
@@ -68,48 +60,9 @@ export default class AppGame {
 
     start() {
         document.body.appendChild(this.renderer.domElement);
+        document.body.addEventListener('click', () => this.pointerLockControls.lock(), false);
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
         this.animate();
-    }
-
-    private createPlate() {
-        const plateMesh = new Mesh(
-            new BoxGeometry(200, 150, 3),
-            new MeshBasicMaterial({ color: 0x68009c })
-        );
-        plateMesh.rotateX(Math.PI / 2);
-        plateMesh.receiveShadow = true;
-
-        return plateMesh;
-    }
-
-    private createCigarette() {
-        const cigOrangeMesh = new Mesh(
-            new CylinderGeometry(5, 5, 30, 32),
-            new MeshBasicMaterial({ color: 0xe29200 })
-        );
-        cigOrangeMesh.position.y -= 55;
-
-        const cigFireMesh = new Mesh(
-            new CylinderGeometry(5, 5, 2.5, 32),
-            new MeshBasicMaterial({ color: 'red' })
-        );
-        cigFireMesh.position.y += 41.3;
-
-        const cigaretteMesh = mergeMeshes([
-            new Mesh(
-                new CylinderGeometry(5, 5, 80, 32),
-                new MeshBasicMaterial({ color: 0xC0C0C0 })
-            ),
-            cigOrangeMesh,
-            cigFireMesh,
-        ], false);
-
-        cigaretteMesh.position.y = 20;
-        cigaretteMesh.rotateX(-Math.PI / 2);
-        cigaretteMesh.castShadow = true;
-
-        return cigaretteMesh;
     }
 
     onWindowResize() {
@@ -123,8 +76,15 @@ export default class AppGame {
     }
 
     animate() {
-        this.orbitControls.update();
         this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(this.animate.bind(this));
+
+        if (this.pointerLockControls.isLocked) {
+            this.handleMovement();
+        }
+    }
+
+    handleMovement() {
+        // throw new Error('Method not implemented.');
     }
 }
