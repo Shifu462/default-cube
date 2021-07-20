@@ -13,6 +13,7 @@ import {
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
 import { createCigarette } from './meshes/cigarette';
 import { createPlate } from './meshes/plate';
+import { MoveState } from './MoveState';
 
 export default class AppGame {
     windowSize = {
@@ -21,6 +22,8 @@ export default class AppGame {
     };
 
     scene = new Scene();
+    moveState = new MoveState();
+
     camera = new PerspectiveCamera(75, this.aspect, 0.1, 1000);
     renderer = new WebGLRenderer({ antialias: true });
 
@@ -62,7 +65,61 @@ export default class AppGame {
         document.body.appendChild(this.renderer.domElement);
         document.body.addEventListener('click', () => this.pointerLockControls.lock(), false);
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
+        this.initMovementEvents();
+
         this.animate();
+    }
+
+    private initMovementEvents() {
+        document.addEventListener('keydown', event => {
+            switch (event.code) {
+                case 'ArrowUp':
+                case 'KeyW':
+                    this.moveState.forward = true;
+                    break;
+
+                case 'ArrowLeft':
+                case 'KeyA':
+                    this.moveState.left = true;
+                    break;
+
+                case 'ArrowDown':
+                case 'KeyS':
+                    this.moveState.backward = true;
+                    break;
+
+                case 'ArrowRight':
+                case 'KeyD':
+                    this.moveState.right = true;
+                    break;
+
+                case 'Space':
+                    // if (canJump === true) velocity.y += 350;
+                    // canJump = false;
+                    break;
+            }
+        });
+
+        document.addEventListener('keyup', event => {
+            switch (event.code) {
+                case 'ArrowUp':
+                case 'KeyW':
+                    this.moveState.forward = false;
+                    break;
+                case 'ArrowLeft':
+                case 'KeyA':
+                    this.moveState.left = false;
+                    break;
+                case 'ArrowDown':
+                case 'KeyS':
+                    this.moveState.backward = false;
+                    break;
+                case 'ArrowRight':
+                case 'KeyD':
+                    this.moveState.right = false;
+                    break;
+            }
+        });
     }
 
     onWindowResize() {
@@ -76,15 +133,21 @@ export default class AppGame {
     }
 
     animate() {
-        this.renderer.render(this.scene, this.camera);
         requestAnimationFrame(this.animate.bind(this));
 
         if (this.pointerLockControls.isLocked) {
             this.handleMovement();
         }
+
+        this.renderer.render(this.scene, this.camera);
     }
 
     handleMovement() {
-        // throw new Error('Method not implemented.');
+        const player = { height: 1.8, speed: 1, turnSpeed: Math.PI * 0.02 };
+
+        if (this.moveState.forward) (this.pointerLockControls as any).moveForward(player.speed);
+        if (this.moveState.backward) (this.pointerLockControls as any).moveForward(-player.speed);
+        if (this.moveState.right) (this.pointerLockControls as any).moveRight(player.speed);
+        if (this.moveState.left) (this.pointerLockControls as any).moveRight(-player.speed);
     }
 }
