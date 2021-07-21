@@ -51,6 +51,7 @@ export class Cigarette implements IInteractableObject {
     }
 
     interact() {
-        console.log('interact');
+        const size = 0.1;
+        this.object.scale.add(new Vector3(size, size, size));
     }
 }
