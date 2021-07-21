@@ -23,7 +23,7 @@ export class Interaction {
 
     initEvents() {
         // document.addEventListener('mousedown', onDocumentMouseDown, false);
-        document.addEventListener('mousemove', $event => {
+        document.addEventListener('mousemove', _event => {
             this._pointerLockControls.getDirection(this._direction);
             this._raycaster.set(this._camera.position, this._direction)
 

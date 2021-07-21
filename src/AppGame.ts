@@ -16,6 +16,7 @@ import { Cigarette } from './meshes/Cigarette';
 import { createPlate } from './meshes/plate';
 import { Movement } from './movement';
 import { PointerLockControlsWithMovement } from './movement/PointerLockControlsWithMovement';
+import { createCrosshair } from './gui';
 
 export default class AppGame {
     scene = new Scene();
@@ -69,6 +70,8 @@ export default class AppGame {
 
         this.camera.position.y = 30;
         this.camera.lookAt(new Vector3(0, 0, 0));
+
+        this.camera.add(createCrosshair());
     }
 
     start() {
