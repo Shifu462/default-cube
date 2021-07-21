@@ -41,6 +41,8 @@ function createCigaretteMesh(): Mesh {
 }
 
 export class Cigarette implements IInteractableObject {
+    isHovered: boolean;
+
     readonly object = createCigaretteMesh();
 
     onHoverChange(isHovered: boolean) {
@@ -49,10 +51,6 @@ export class Cigarette implements IInteractableObject {
     }
 
     interact() {
-        const materials = this.object.material as Material[];
-
-        for (const m of materials) {
-            m.alphaTest = 0;
-        }
+        console.log('interact');
     }
 }

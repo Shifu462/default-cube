@@ -22,7 +22,10 @@ export class Interaction {
     }
 
     initEvents() {
-        // document.addEventListener('mousedown', onDocumentMouseDown, false);
+        document.addEventListener('mousedown', () => {
+            this._interactableObjects.filter(x => x.isHovered).forEach(x => x.interact());
+        }, false);
+
         document.addEventListener('mousemove', _event => {
             this._pointerLockControls.getDirection(this._direction);
             this._raycaster.set(this._camera.position, this._direction)
@@ -34,8 +37,14 @@ export class Interaction {
             const newHoveredIntersectionObjects = intersectionObjects.filter(x => !previousIntersectionObjects.includes(x));
             const oldUnhoveredIntersections = previousIntersectionObjects.filter(x => !intersectionObjects.includes(x));
 
-            newHoveredIntersectionObjects.map(i => this.findInteractable(i)).forEach(i => i.onHoverChange(true));
-            oldUnhoveredIntersections.map(i => this.findInteractable(i)).forEach(i => i.onHoverChange(false));
+            newHoveredIntersectionObjects.map(i => this.findInteractable(i)).forEach(i => {
+                i.isHovered = true;
+                i.onHoverChange(true);
+            });
+            oldUnhoveredIntersections.map(i => this.findInteractable(i)).forEach(i => {
+                i.isHovered = false;
+                i.onHoverChange(false);
+            });
         }, false);
     }
 }
