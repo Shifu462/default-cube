@@ -8,16 +8,16 @@ export class Movement {
     Right = false;
 
     constructor(
-        private readonly Controls: PointerLockControlsWithMovement,
-        private readonly PlayerConfig: PlayerConfig,
+        private readonly _controls: PointerLockControlsWithMovement,
+        private readonly _playerConfig: PlayerConfig,
     ) {
     }
 
     handleTick() {
-        if (this.Forward) this.Controls.moveForward(this.PlayerConfig.Speed);
-        if (this.Backward) this.Controls.moveForward(-this.PlayerConfig.Speed);
-        if (this.Right) this.Controls.moveRight(this.PlayerConfig.Speed);
-        if (this.Left) this.Controls.moveRight(-this.PlayerConfig.Speed);
+        if (this.Forward) this._controls.moveForward(this._playerConfig.Speed);
+        if (this.Backward) this._controls.moveForward(-this._playerConfig.Speed);
+        if (this.Right) this._controls.moveRight(this._playerConfig.Speed);
+        if (this.Left) this._controls.moveRight(-this._playerConfig.Speed);
     }
 
     private readonly eventCodesToPropNames: Record<string, keyof Movement> = {

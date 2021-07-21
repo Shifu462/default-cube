@@ -3,10 +3,12 @@ import {
     CylinderGeometry,
     MeshBasicMaterial,
     Vector3,
+    Material,
 } from 'three';
+import { IInteractableObject } from '../interaction';
 import { mergeMeshes } from '../utils/mergeMeshes';
 
-export function createCigarette() {
+function createCigaretteMesh(): Mesh {
     const cigOrangeMesh = new Mesh(
         new CylinderGeometry(5, 5, 30, 32),
         new MeshBasicMaterial({ color: 0xe29200 })
@@ -36,4 +38,24 @@ export function createCigarette() {
     cigaretteMesh.scale.sub(new Vector3(scale, scale, scale));
 
     return cigaretteMesh;
+}
+
+export class Cigarette implements IInteractableObject {
+    readonly object = createCigaretteMesh();
+
+    hoverIn() {
+        console.log('hover');
+    }
+
+    hoverOut() {
+        console.log('out');
+    }
+
+    interact() {
+        const materials = this.object.material as Material[];
+
+        for (const m of materials) {
+            m.alphaTest = 0;
+        }
+    }
 }
