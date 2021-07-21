@@ -7,7 +7,7 @@ export class Interaction {
     private readonly _direction = new Vector3();
     private readonly _interactableObjects3D: Object3D[];
 
-    private _intersections: Intersection[];
+    private _intersections: Intersection[] = [];
 
     constructor(
         private readonly _camera: Camera,
@@ -27,11 +27,15 @@ export class Interaction {
             this._pointerLockControls.getDirection(this._direction);
             this._raycaster.set(this._camera.position, this._direction)
 
+            const previousIntersectionObjects = this._intersections.map(x => x.object);
             this._intersections = this._raycaster.intersectObjects(this._interactableObjects3D);
+            const intersectionObjects = this._intersections.map(i => i.object);
 
-            for (const i of this._intersections) {
-                this.findInteractable(i.object).hoverIn();
-            }
+            const newHoveredIntersectionObjects = intersectionObjects.filter(x => !previousIntersectionObjects.includes(x));
+            const oldUnhoveredIntersections = previousIntersectionObjects.filter(x => !intersectionObjects.includes(x));
+
+            newHoveredIntersectionObjects.map(i => this.findInteractable(i)).forEach(i => i.onHoverChange(true));
+            oldUnhoveredIntersections.map(i => this.findInteractable(i)).forEach(i => i.onHoverChange(false));
         }, false);
     }
 }

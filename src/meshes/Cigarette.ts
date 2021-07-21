@@ -43,12 +43,9 @@ function createCigaretteMesh(): Mesh {
 export class Cigarette implements IInteractableObject {
     readonly object = createCigaretteMesh();
 
-    hoverIn() {
-        console.log('hover');
-    }
-
-    hoverOut() {
-        console.log('out');
+    onHoverChange(isHovered: boolean) {
+        if (isHovered) console.log('hovered');
+        else console.log('unhovered');
     }
 
     interact() {
