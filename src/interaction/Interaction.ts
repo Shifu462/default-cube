@@ -7,7 +7,7 @@ export class Interaction {
     private readonly _direction = new Vector3();
     private readonly _interactableObjects3D: Object3D[];
 
-    private _intersections: Intersection[] = [];
+    private _intersections: IInteractableObject[] = [];
 
     constructor(
         private readonly _camera: Camera,
@@ -30,21 +30,25 @@ export class Interaction {
             this._pointerLockControls.getDirection(this._direction);
             this._raycaster.set(this._camera.position, this._direction)
 
-            const previousIntersectionObjects = this._intersections.map(x => x.object);
-            this._intersections = this._raycaster.intersectObjects(this._interactableObjects3D);
-            const intersectionObjects = this._intersections.map(i => i.object);
+            const previousIntersectionObjects = [...this._intersections];
 
-            const newHoveredIntersectionObjects = intersectionObjects.filter(x => !previousIntersectionObjects.includes(x));
-            const oldUnhoveredIntersections = previousIntersectionObjects.filter(x => !intersectionObjects.includes(x));
+            this._intersections = this._raycaster
+                .intersectObjects(this._interactableObjects3D)
+                .map(i => this.findInteractable(i.object));
 
-            newHoveredIntersectionObjects.map(i => this.findInteractable(i)).forEach(i => {
+            const newHoveredIntersectionObjects = this._intersections.filter(x => !previousIntersectionObjects.includes(x));
+            const oldUnhoveredIntersections = previousIntersectionObjects.filter(x => !this._intersections.includes(x));
+
+            for (const i of newHoveredIntersectionObjects) {
                 i.isHovered = true;
                 i.onHoverChange(true);
-            });
-            oldUnhoveredIntersections.map(i => this.findInteractable(i)).forEach(i => {
+            }
+
+            for (const i of oldUnhoveredIntersections) {
                 i.isHovered = false;
                 i.onHoverChange(false);
-            });
+            }
+
         }, false);
     }
 }
