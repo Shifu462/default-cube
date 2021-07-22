@@ -9,6 +9,10 @@ import {
     Points,
     PointsMaterial,
     FogExp2,
+    DirectionalLight,
+    PCFSoftShadowMap,
+    sRGBEncoding,
+    SpotLight,
 } from 'three';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
 import { IInteractableObject, Interaction } from './interaction';
@@ -48,9 +52,27 @@ export default class AppGame {
     }
 
     constructor() {
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.shadowMap.enabled = true;
+        this.initRenderer();
+        this.initCamera();
+        this.initScene();
+        this.initSceneObjects();
 
+        const spotLight = new SpotLight(0xffffff, 1);
+        spotLight.position.set(15, 40, 35);
+        spotLight.angle = Math.PI / 4;
+        spotLight.penumbra = 0.3;
+        spotLight.decay = 1;
+        spotLight.distance = 150;
+
+        spotLight.castShadow = true;
+        spotLight.shadow.mapSize.width = 512;
+        spotLight.shadow.mapSize.height = 512;
+        spotLight.shadow.camera.near = 10;
+        spotLight.shadow.camera.far = 200;
+        this.scene.add(spotLight);
+    }
+
+    private initSceneObjects() {
         this.scene.add(this.pointerLockControls.getObject());
 
         this.interactableObjects.forEach(obj => this.scene.add(obj.object));
@@ -60,18 +82,28 @@ export default class AppGame {
         points.position.y += 30;
         this.scene.add(points);
 
+        const light = new DirectionalLight(0xFFFFFF, 1);
+        this.scene.add(light);
+    }
+
+    private initScene() {
         this.scene.background = new Color('black');
         this.scene.fog = new FogExp2(0x000000, 0.005);
+    }
 
-        this.camera.position.z = 100;
-
-        const light = new AmbientLight(0xFFFFFF, 1);
-        this.scene.add(light);
-
+    private initCamera() {
         this.camera.position.y = 30;
+        this.camera.position.z = 100;
         this.camera.lookAt(new Vector3(0, 0, 0));
-
         this.camera.add(createCrosshair());
+    }
+
+    private initRenderer() {
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = PCFSoftShadowMap;
+        (this.renderer as any).outputEncoding = sRGBEncoding;
     }
 
     start() {
@@ -87,7 +119,6 @@ export default class AppGame {
     onWindowResize() {
         this.camera.aspect = this.aspect;
         this.camera.updateProjectionMatrix();
-
         this.renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
