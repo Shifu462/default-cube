@@ -1,4 +1,4 @@
-import { Camera, Intersection, Object3D, Raycaster, Vector2, Vector3 } from 'three';
+import { Camera, Group, Intersection, Object3D, Raycaster, Vector2, Vector3 } from 'three';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
 import { IInteractableObject } from './IInteractableObject';
 
@@ -33,13 +33,21 @@ export class Interaction {
             const previousIntersectionObjects = [...this._intersections];
 
             this._intersections = this._raycaster
-                .intersectObjects(this._interactableObjects3D)
-                .map(i => this.findInteractable(i.object));
+                .intersectObjects(this._interactableObjects3D, true)
+                .map(i => i.object)
+                .map(obj =>
+                    this.findInteractable(
+                        obj.parent instanceof Group
+                        ? obj.parent
+                        : obj
+                    )
+                );
 
             const newHoveredIntersectionObjects = this._intersections.filter(x => !previousIntersectionObjects.includes(x));
             const oldUnhoveredIntersections = previousIntersectionObjects.filter(x => !this._intersections.includes(x));
 
             for (const i of newHoveredIntersectionObjects) {
+                console.log(i);
                 i.isHovered = true;
                 i.onHoverChange(true);
             }

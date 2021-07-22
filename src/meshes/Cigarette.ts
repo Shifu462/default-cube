@@ -3,12 +3,12 @@ import {
     CylinderGeometry,
     MeshBasicMaterial,
     Vector3,
-    Material,
+    PointLight,
+    Group,
 } from 'three';
 import { IInteractableObject } from '../interaction';
-import { mergeMeshes } from '../utils/mergeMeshes';
 
-function createCigaretteMesh(): Mesh {
+function createCigaretteMesh() {
     const cigOrangeMesh = new Mesh(
         new CylinderGeometry(5, 5, 30, 32),
         new MeshBasicMaterial({ color: 0xe29200 })
@@ -21,29 +21,40 @@ function createCigaretteMesh(): Mesh {
     );
     cigFireMesh.position.y += 41.3;
 
-    const cigaretteMesh = mergeMeshes([
-        new Mesh(
-            new CylinderGeometry(5, 5, 80, 32),
-            new MeshBasicMaterial({ color: 0xC0C0C0 })
-        ),
-        cigOrangeMesh,
-        cigFireMesh,
-    ], false);
+    const cigFireLight = new PointLight('red', 2, 10);
+    cigFireLight.add(cigFireMesh);
 
-    cigaretteMesh.position.y = 20;
-    cigaretteMesh.rotateX(-Math.PI / 2);
-    cigaretteMesh.castShadow = true;
+    const group = new Group()
+        .add(
+            cigOrangeMesh,
+            new Mesh(
+                new CylinderGeometry(5, 5, 80, 32),
+                new MeshBasicMaterial({ color: 0xC0C0C0 })
+            ),
+            cigFireLight,
+        );
+
+    group.position.y = 20;
+    group.rotateX(-Math.PI / 2);
+    group.castShadow = true;
 
     const scale = .9;
-    cigaretteMesh.scale.sub(new Vector3(scale, scale, scale));
+    group.scale.sub(new Vector3(scale, scale, scale));
 
-    return cigaretteMesh;
+    return group;
 }
 
 export class Cigarette implements IInteractableObject {
     isHovered: boolean;
 
     readonly object = createCigaretteMesh();
+    readonly yellowPart = this.object.children[0] as Mesh;
+    readonly whitePart = this.object.children[1] as Mesh;
+    readonly firePart = this.object.children[2];
+
+    constructor() {
+
+    }
 
     onHoverChange(isHovered: boolean) {
         if (isHovered) console.log('hovered');
@@ -51,7 +62,16 @@ export class Cigarette implements IInteractableObject {
     }
 
     interact() {
-        const size = 0.1;
-        this.object.scale.add(new Vector3(size, size, size));
+        if (this.whitePart.scale.y < 0.2) return;
+
+        this.yellowPart.geometry.computeBoundingBox();
+        this.whitePart.geometry.computeBoundingBox();
+
+        console.log(this.yellowPart, this.whitePart);
+
+        this.whitePart.translateY(-7.5);
+        this.whitePart.scale.sub(new Vector3(0, .2, 0));
+
+        this.firePart.position.sub(new Vector3(0, 7.5, 0));
     }
 }
